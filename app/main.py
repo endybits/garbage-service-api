@@ -102,3 +102,34 @@ async def update_container(
         f.close()
     # TODO Handle errors when element doesn't exists (Raise a status code 400)
     return {'Error': 'Element does not exists'}
+
+### Delete container
+@app.delete(
+    path='/containers/{container_id}',
+    status_code=status.HTTP_200_OK,
+)
+async def delete_container(
+    container_id: int = Path(..., gt=0),
+):
+    delete = False
+    with open('./app/containers.json', 'r+', encoding='utf-8') as f:
+        container_list = f.read()
+        container_list = json.loads(container_list)
+        for i, container in enumerate(container_list):
+            print('INDEX => '.format(i))
+            print('CONTAINER: '.format(container))
+            if container['container_id'] == container_id:
+                index = i
+                delete = True
+        
+        if delete:
+            container_list.pop(index)
+            container_new_list = json.dumps(container_list)
+            f.seek(0)
+            f.truncate(0) # Clear the file content.
+            f.write(container_new_list)
+            f.close()
+            return {'message': f'The element with id: {container_id} was deleted'}
+        
+    # TODO Handle errors when element doesn't exists (Raise a status code 400)
+    return {'Error': 'Element does not exists'}
