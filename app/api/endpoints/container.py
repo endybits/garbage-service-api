@@ -1,27 +1,20 @@
 import json
 from typing import List
 
-
-from fastapi import FastAPI
-from fastapi import Body, Path
+from fastapi import APIRouter
 from fastapi import status
+from fastapi import Path, Body
 
 from app.schemas.container import Container, ContainerUpdatable
-from app.api.api import api_router
-
-app = FastAPI()
-
-app.include_router(api_router)
-
-@app.get(path='/', status_code=status.HTTP_200_OK)
-async def home():
-    return {'message': 'Hi, this is the incredible service project\'s home page'}
 
 
-"""
+
+router = APIRouter()
+
+
 ### Create container
-@app.post(
-    path='/containers',
+@router.post(
+    path='/',
     status_code=status.HTTP_201_CREATED,
     response_model=Container
 )
@@ -39,8 +32,8 @@ async def create_container(
     return container
 
 ### Get container list
-@app.get(
-    path='/containers',
+@router.get(
+    path='/',
     status_code=status.HTTP_200_OK,
     response_model=List[Container]
 )
@@ -54,8 +47,8 @@ async def container_list(
     return container_list
 
 ### Get container detail
-@app.get(
-    path='/containers/{container_id}',
+@router.get(
+    path='/{container_id}',
     status_code=status.HTTP_200_OK,
     response_model=Container
 )
@@ -74,8 +67,8 @@ async def container_detail(
 
 
 ### Update container
-@app.put(
-    path='/containers/{container_id}',
+@router.put(
+    path='/{container_id}',
     status_code=status.HTTP_200_OK,
     response_model=Container
 )
@@ -99,6 +92,7 @@ async def update_container(
         if updated:
             updated_container_list = json.dumps(container_list)
             f.seek(0)
+            f.truncate(0) # Clear the file content.
             f.write(updated_container_list)
             f.close()
             return container_ok
@@ -107,8 +101,8 @@ async def update_container(
     return {'Error': 'Element does not exists'}
 
 ### Delete container
-@app.delete(
-    path='/containers/{container_id}',
+@router.delete(
+    path='/{container_id}',
     status_code=status.HTTP_200_OK,
 )
 async def delete_container(
@@ -136,4 +130,3 @@ async def delete_container(
         
     # TODO Handle errors when element doesn't exists (Raise a status code 400)
     return {'Error': 'Element does not exists'}
-"""
