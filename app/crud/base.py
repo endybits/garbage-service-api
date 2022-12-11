@@ -32,3 +32,9 @@ class CRUDBase(Generic[ModelType, CreateSchemaType]):
         db.commit()
         db.refresh(db_obj)
         return db_obj
+    
+    def get_list(
+        self, db: Session, *, skip: int = 0, limit: int = 100
+    ) -> List[ModelType]:
+
+        return db.query(self.model).offset(skip).limit(limit).all()

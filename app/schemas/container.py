@@ -17,7 +17,7 @@ class ContainerBase(BaseModel):
 class Container(ContainerBase):
     container_id: int = Field(
         ...,
-        gt=1,
+        gt=0,
         example=23
     )
 

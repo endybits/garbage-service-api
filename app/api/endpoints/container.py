@@ -41,10 +41,6 @@ async def create_container(
     return resp_container
 
 
-
-
-
-
 ### Get container list
 @router.get(
     path='/',
@@ -52,13 +48,22 @@ async def create_container(
     response_model=List[Container]
 )
 async def container_list(
+    db: Session = Depends(get_db),
+    skip: int = 0,
+    limit: int = 100
 ):
-    with open('./app/containers.json', 'r', encoding='utf-8') as f:
-
-        container_list = f.read()
-        container_list = json.loads(container_list)
-        f.close()
-    return container_list
+    containers = CRUDContainer(ContainerModel).get_container_list(db=db, skip=skip, limit=limit)
+    resp_container_list = []
+    for container in containers:
+        container_item = Container(
+            container_id=container.container_id,
+            address = container.address,
+            volume = container.volume,
+            latitude = container.latitude,
+            longitude = container.longitude
+        )
+        resp_container_list.append(container_item)
+    return resp_container_list    
 
 ### Get container detail
 @router.get(
