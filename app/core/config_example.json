@@ -1,0 +1,14 @@
+{
+    "api": {
+        "aws_access_key_id":"YOUR_AWS_ACCESS_KEY",
+        "aws_secret_access_key": "YOUR_SECRET_ACCESS_KEY",
+        "aws_db": {
+            "ENGINE": "",
+            "NAME": "garbage_service_db",
+            "USER": "YOUR_USER",
+            "PASSWORD": "YOUR_PASSWORD",
+            "HOST": "YOUR_HOSTNAME",
+            "PORT": "3306"
+        }
+    }
+}
