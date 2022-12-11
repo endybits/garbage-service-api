@@ -1,12 +1,15 @@
 import json
-from typing import List
+from typing import List, Any
 
+from sqlalchemy.orm import Session
 from fastapi import APIRouter
-from fastapi import status
+from fastapi import status, Depends
 from fastapi import Path, Body
 
-from app.schemas.container import Container, ContainerUpdatable
-
+from app.schemas.container import Container, ContainerCreate, ContainerUpdate
+from app.api.deps import get_db
+from app.crud.container import CRUDContainer
+from app.models.models import ContainerModel
 
 
 router = APIRouter()
@@ -19,17 +22,28 @@ router = APIRouter()
     response_model=Container
 )
 async def create_container(
-    container: Container = Body(...)
-):
-    container_dict = container.dict()
-    with open('./app/containers.json', 'r+', encoding='utf-8') as f:
-        container_list = f.read()
-        container_list = json.loads(container_list)
-        container_list.append(container_dict)
-        container_json = json.dumps(container_list)
-        f.seek(0)
-        f.write(container_json)
-    return container
+    *,
+    db: Session = Depends(get_db),
+    container_add: ContainerCreate = Body(...)
+) -> Any:
+    """
+        Create a new container    
+    """
+    container = CRUDContainer(ContainerModel).create(db=db, object_add=container_add)
+
+    resp_container = Container(
+        container_id=container.container_id,
+        address = container.address,
+        volume = container.volume,
+        latitude = container.latitude,
+        longitude = container.longitude
+    )    
+    return resp_container
+
+
+
+
+
 
 ### Get container list
 @router.get(
@@ -74,7 +88,7 @@ async def container_detail(
 )
 async def update_container(
     container_id: int = Path(..., gt=0),
-    container_payload: ContainerUpdatable = Body(...)
+    container_payload: ContainerUpdate = Body(...)
 ):
     container_dict = container_payload.dict()
     updated = False

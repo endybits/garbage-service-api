@@ -21,5 +21,8 @@ class Container(ContainerBase):
         example=23
     )
 
-class ContainerUpdatable(ContainerBase):
+class ContainerUpdate(ContainerBase):
+    pass
+
+class ContainerCreate(ContainerBase):
     pass
