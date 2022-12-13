@@ -36,7 +36,8 @@ async def create_container(
         address = container.address,
         volume = container.volume,
         latitude = container.latitude,
-        longitude = container.longitude
+        longitude = container.longitude,
+        status=container.status
     )    
     return resp_container
 
@@ -60,7 +61,8 @@ async def container_list(
             address = container.address,
             volume = container.volume,
             latitude = container.latitude,
-            longitude = container.longitude
+            longitude = container.longitude,
+            status=container.status
         )
         resp_container_list.append(container_item)
     return resp_container_list    
@@ -106,6 +108,7 @@ async def update_container(
                 container['volume'] = container_dict.get('volume') if container_dict.get('volume') else container['volume']
                 container['latitude'] = container_dict.get('latitude') if container_dict.get('latitude') else container['latitude']
                 container['longitude'] = container_dict.get('longitude') if container_dict.get('longitude') else container['longitude']
+                container['status'] = container_dict.get('status') if container_dict.get('status') else container['status']
                 container_ok = container
                 updated = True
         if updated:

@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from pydantic import Field
 
+from app.utils.base import StatusContainer
 
 class ContainerBase(BaseModel):
     address: str = Field(
@@ -12,6 +13,7 @@ class ContainerBase(BaseModel):
     volume: float = Field(..., example=4000.45)
     latitude: float = Field(..., example=11.465376)
     longitude: float = Field(..., example=17.642488)
+    status: StatusContainer = Field(..., example=StatusContainer.empty)
 
 
 class Container(ContainerBase):
