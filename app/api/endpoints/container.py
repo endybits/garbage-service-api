@@ -1,5 +1,5 @@
 import json
-from typing import List, Any
+from typing import List, Dict, Any, Union
 
 from sqlalchemy.orm import Session
 from fastapi import APIRouter
@@ -74,15 +74,21 @@ async def container_list(
     response_model=Container
 )
 async def container_detail(
+    db: Session = Depends(get_db),
     container_id: int = Path(..., gt=0)
 ):
-    with open('./app/containers.json', 'r', encoding='utf-8') as f:
-        container_list = f.read()
-        container_list = json.loads(container_list)
-        for container in container_list:
-            if container['container_id'] == container_id:
-                return container
-        f.close()
+    container = CRUDContainer(ContainerModel).get(db=db, id=container_id)
+    if container:
+        
+        resp_container = Container(
+            container_id=container.container_id,
+            address = container.address,
+            volume = container.volume,
+            latitude = container.latitude,
+            longitude = container.longitude,
+            status=container.status
+        )    
+        return resp_container
     # TODO Handle errors when element doesn't exists (Raise a status code 400)
     return {'Error': 'Element does not exists'}
 
@@ -94,33 +100,25 @@ async def container_detail(
     response_model=Container
 )
 async def update_container(
+    db: Session = Depends(get_db),
     container_id: int = Path(..., gt=0),
-    container_payload: ContainerUpdate = Body(...)
+    container: Union[ContainerUpdate, Dict[str, Any]] = Body(...)
 ):
-    container_dict = container_payload.dict()
-    updated = False
-    with open('./app/containers.json', 'r+', encoding='utf-8') as f:
-        container_list = f.read()
-        container_list = json.loads(container_list)
-        for container in container_list:
-            if container['container_id'] == container_id:
-                container['address'] = container_dict.get('address') if container_dict.get('address') else container['address']
-                container['volume'] = container_dict.get('volume') if container_dict.get('volume') else container['volume']
-                container['latitude'] = container_dict.get('latitude') if container_dict.get('latitude') else container['latitude']
-                container['longitude'] = container_dict.get('longitude') if container_dict.get('longitude') else container['longitude']
-                container['status'] = container_dict.get('status') if container_dict.get('status') else container['status']
-                container_ok = container
-                updated = True
-        if updated:
-            updated_container_list = json.dumps(container_list)
-            f.seek(0)
-            f.truncate(0) # Clear the file content.
-            f.write(updated_container_list)
-            f.close()
-            return container_ok
-        f.close()
+    container_obj = CRUDContainer(ContainerModel).get(db=db, id=container_id)
+    container_updated = CRUDContainer(ContainerModel).update(db=db, db_obj=container_obj, object_in=container)
+    if container_updated:
+        resp_container = Container(
+                container_id=container_updated.container_id,
+                address = container_updated.address,
+                volume = container_updated.volume,
+                latitude = container_updated.latitude,
+                longitude = container_updated.longitude,
+                status=container_updated.status
+            )    
+        return resp_container
     # TODO Handle errors when element doesn't exists (Raise a status code 400)
     return {'Error': 'Element does not exists'}
+
 
 ### Delete container
 @router.delete(
