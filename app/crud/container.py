@@ -25,8 +25,8 @@ class CRUDContainer(CRUDBase[ContainerModel, ContainerCreate]):
 
     def get(self, db: Session, id: Any) -> Optional[ContainerModel]:
         return db.query(ContainerModel).filter(ContainerModel.container_id==id).first()
-    
-    
+
+
     def update(
         self, db: Session, db_obj: ContainerModel, object_in: Union[ContainerUpdate, Dict[str, Any]]
     ) -> ContainerModel:
@@ -39,3 +39,10 @@ class CRUDContainer(CRUDBase[ContainerModel, ContainerCreate]):
         #    if field in update_data:
         #        setattr(db_obj, field, update_data[field])
         return super().update(db=db, db_obj=db_obj, object_in=update_data)
+
+
+    def delete(self, db: Session, id: Any) -> ContainerModel:
+        container_model_obj = db.query(ContainerModel).get(id)
+        db.delete(container_model_obj)
+        db.commit()
+        return container_model_obj
