@@ -1,4 +1,6 @@
 py39/
 __pycache__/
 
+.vscode/
+
 config.json
