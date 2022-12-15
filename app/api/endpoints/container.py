@@ -123,6 +123,21 @@ async def update_container(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail= f'Error updating Container with id= {container_id}'
         )
+    container_status = None
+    if isinstance(container, dict):
+        container_status = container.get('status') if container.get('status') else None
+    if isinstance(container, ContainerUpdate):
+        container_status = container.status.value
+    if container_status == 'full' and container_obj.status != 'full':   
+        # status changed to full
+        print('''
+            Call function to add point to route and sum volume.
+            This function also must to check if the cumulative volume exceeds
+            the truck capacity.
+            ''')
+
+
+
     resp_container = Container(
             container_id=container_updated.container_id,
             address = container_updated.address,
@@ -149,5 +164,6 @@ async def delete_container(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail= f'Container with id= {container_id} doesn\'t exists'
         )
-    removed_container = CRUDContainer(ContainerModel).remove(db=db, id=container_id)
-    return {'message': f'Container with id= {container_id} was removed successfully'}
+    remove_container = CRUDContainer(ContainerModel).remove(db=db, id=container_id)
+    if remove_container:
+        return {'message': f'Container with id= {container_id} was removed successfully'}
