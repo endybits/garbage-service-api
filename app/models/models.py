@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Float, String, Integer, DateTime, Enum, PickleType
+from sqlalchemy import Column, Float, String, Integer, DateTime, Enum, PickleType 
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.ext.mutable import MutableList
 
