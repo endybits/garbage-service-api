@@ -1,9 +1,10 @@
-from typing import Any
+import json
+from typing import Any, Union, Any, Dict
 
 from sqlalchemy.orm import Session
 from fastapi import APIRouter
 from fastapi import status, Depends
-from fastapi import Body
+from fastapi import Body, Path
 
 from app.api.deps import get_db
 from app.models.models import RouteModel
@@ -23,6 +24,12 @@ async def routes_list(
     limit: int = 100
 ):
     rep_route_list = CRUDRoutes(RouteModel).get_list(db=db, skip=skip, limit=limit)
+    for route in rep_route_list:
+        points = route.points
+        print(points)
+        for point in points:
+            print(type(point))
+
     return rep_route_list
 
 
@@ -43,3 +50,19 @@ async def create_route(
         status=route_created_model.status
     )
     return object_route
+
+
+## Update Route
+@router.put(
+    path='/{route_id}',
+    status_code=status.HTTP_200_OK
+)
+async def update_route(
+    db: Session = Depends(get_db),
+    route_id: int = Path(..., gt=0),
+    route: Union[RouteUpdate, Dict[str, Any]] = Body(...)
+):
+    
+    route_obj = CRUDRoutes(RouteModel).get(db=db, id=route_id)
+    updated_route = CRUDRoutes(RouteModel).update(db=db, db_obj=route_obj, object_in=route)
+    return updated_route
