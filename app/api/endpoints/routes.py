@@ -1,5 +1,5 @@
 import json
-from typing import Any, Union, Any, Dict
+from typing import Any, Union, Any, Dict, List
 
 from sqlalchemy.orm import Session
 from fastapi import APIRouter
@@ -7,6 +7,7 @@ from fastapi import status, Depends
 from fastapi import Body, Path
 
 from app.api.deps import get_db
+from app.utils.base import StatusRoute
 from app.models.models import RouteModel
 from app.schemas.route import Route, RouteCreate, RouteUpdate
 from app.crud.routes import CRUDRoutes
@@ -43,11 +44,16 @@ async def create_route(
     route_add: RouteCreate = Body(...)
 ) -> Any:
     route_created_model = CRUDRoutes(model=RouteModel).create(db=db, object_add=route_add)
+    ROUTE_ID = int(str(route_created_model.route_id))
+    CUMULATIVE_VOL = float(str(route_created_model.cumulative_vol))
+    LOCATIONS = [point for point in route_created_model.points]
+    STATUS = StatusRoute(route_created_model.status)
+    print(LOCATIONS)
     object_route = Route(
-        route_id=route_created_model.route_id,
-        cumulative_vol=route_created_model.cumulative_vol,
-        points=route_created_model.points,
-        status=route_created_model.status
+        route_id=ROUTE_ID,
+        cumulative_vol=CUMULATIVE_VOL,
+        points=LOCATIONS,
+        status=STATUS
     )
     return object_route
 
