@@ -19,6 +19,8 @@ class CRUDRoutes(CRUDBase):
     def get_list(self, db: Session, *, skip: int = 0, limit: int = 100) -> List[RouteModel]:
         return super().get_list(db, skip=skip, limit=limit)
 
+    def get_last_row(self, db: Session, *, skip: int = 0, limit: int = 100) -> Optional[RouteModel]:
+        return db.query(RouteModel).order_by(RouteModel.route_id.desc()).offset(skip).limit(limit).first()
 
     def get(self, db: Session, id: int) -> Optional[RouteModel]:
         return db.query(RouteModel).filter(RouteModel.route_id == id).first()

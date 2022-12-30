@@ -11,6 +11,7 @@ from fastapi import status
 from app.api.api import api_router
 
 app = FastAPI()
+app.title = 'Garbage Service API with FastAPI'
 
 app.include_router(api_router)
 

@@ -30,7 +30,7 @@ async def routes_list(
         print(points)
         for point in points:
             print(type(point))
-
+    
     return rep_route_list
 
 

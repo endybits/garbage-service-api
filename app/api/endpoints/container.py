@@ -1,4 +1,3 @@
-import json
 from typing import List, Dict, Any, Union
 
 from sqlalchemy.orm import Session
@@ -11,7 +10,7 @@ from app.schemas.container import Container, ContainerCreate, ContainerUpdate
 from app.api.deps import get_db
 from app.crud.container import CRUDContainer
 from app.models.models import ContainerModel
-
+from app.utils.scripts import add_point_to_route
 
 router = APIRouter()
 
@@ -140,6 +139,7 @@ async def update_container(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail= f'Container with id= {container_id} doesn\'t exists'
         )
+    old_status = container_obj.status
     container_updated = CRUDContainer(ContainerModel).update(db=db, db_obj=container_obj, object_in=container)
     if not container_updated:
         raise HTTPException(
@@ -151,6 +151,16 @@ async def update_container(
         container_status = container.get('status') if container.get('status') else None
     if isinstance(container, ContainerUpdate):
         container_status = container.status.value
+    
+    
+    ## Prepare response data
+    CONTAINER_ID = int(str(container_updated.container_id))
+    ADDRESS = str(container_updated.address)
+    VOLUME = float(str(container_updated.volume))
+    LATITUDE = float(str(container_updated.latitude))
+    LONGITUDE = float(str(container_updated.longitude))
+    STATUS = StatusContainer(container_updated.status)
+    
     if container_status == 'full' and container_obj.status != 'full':   
         # status changed to full
         print('''
@@ -159,14 +169,8 @@ async def update_container(
             the truck capacity.
             ''')
         #TODO Include optimal distance in route register
+    add_point_to_route(container_id=CONTAINER_ID, volume=VOLUME, db=db)
 
-    ## Prepare response data
-    CONTAINER_ID = int(str(container_updated.container_id))
-    ADDRESS = str(container_updated.address)
-    VOLUME = float(str(container_updated.volume))
-    LATITUDE = float(str(container_updated.latitude))
-    LONGITUDE = float(str(container_updated.longitude))
-    STATUS = StatusContainer(container_updated.status)
     resp_container = Container(
             container_id = CONTAINER_ID,
             address = ADDRESS,
