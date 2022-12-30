@@ -66,3 +66,16 @@ async def update_route(
     route_obj = CRUDRoutes(RouteModel).get(db=db, id=route_id)
     updated_route = CRUDRoutes(RouteModel).update(db=db, db_obj=route_obj, object_in=route)
     return updated_route
+
+
+## Remove Route
+@router.delete(
+    path='/{route_id}',
+    status_code=status.HTTP_200_OK
+)
+async def delete_route(
+    db: Session = Depends(get_db),
+    route_id: int = Path(..., gt=0)
+):
+    route_obj = CRUDRoutes(RouteModel).remove(db=db, id=route_id)
+    return {'message': f'The route with id = {route_id} was removed successfully'}

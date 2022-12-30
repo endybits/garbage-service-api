@@ -6,6 +6,7 @@ from fastapi import APIRouter
 from fastapi import status, Depends, HTTPException
 from fastapi import Path, Body
 
+from app.utils.base import StatusContainer
 from app.schemas.container import Container, ContainerCreate, ContainerUpdate
 from app.api.deps import get_db
 from app.crud.container import CRUDContainer
@@ -35,13 +36,21 @@ async def create_container(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail= f'Object not was created'
         )
+    
+    CONTAINER_ID = int(str(container.container_id))
+    ADDRESS = str(container.address)
+    VOLUME = float(str(container.volume))
+    LATITUDE = float(str(container.latitude))
+    LONGITUDE = float(str(container.longitude))
+    STATUS = StatusContainer(container.status)
+
     resp_container = Container(
-        container_id=container.container_id,
-        address = container.address,
-        volume = container.volume,
-        latitude = container.latitude,
-        longitude = container.longitude,
-        status=container.status
+        container_id=CONTAINER_ID,
+        address = ADDRESS,
+        volume = VOLUME,
+        latitude = LATITUDE,
+        longitude = LONGITUDE,
+        status=STATUS
     )    
     return resp_container
 
@@ -60,13 +69,20 @@ async def container_list(
     containers = CRUDContainer(ContainerModel).get_container_list(db=db, skip=skip, limit=limit)
     resp_container_list = []
     for container in containers:
+        CONTAINER_ID = int(str(container.container_id))    
+        ADDRESS = str(container.address)
+        VOLUME = float(str(container.volume))
+        LATITUDE = float(str(container.latitude))
+        LONGITUDE = float(str(container.longitude))
+        STATUS = StatusContainer(container.status)
+
         container_item = Container(
-            container_id=container.container_id,
-            address = container.address,
-            volume = container.volume,
-            latitude = container.latitude,
-            longitude = container.longitude,
-            status=container.status
+            container_id=CONTAINER_ID,
+            address = ADDRESS,
+            volume = VOLUME,
+            latitude = LATITUDE,
+            longitude = LONGITUDE,
+            status=STATUS
         )
         resp_container_list.append(container_item)
     return resp_container_list    
@@ -89,13 +105,20 @@ async def container_detail(
             detail= f'Container with id= {container_id} doesn\'t exists'
         )
 
+    CONTAINER_ID = int(str(container.container_id))
+    ADDRESS = str(container.address)
+    VOLUME = float(str(container.volume))
+    LATITUDE = float(str(container.latitude))
+    LONGITUDE = float(str(container.longitude))
+    STATUS = StatusContainer(container.status)
+
     resp_container = Container(
-        container_id=container.container_id,
-        address = container.address,
-        volume = container.volume,
-        latitude = container.latitude,
-        longitude = container.longitude,
-        status=container.status
+        container_id=CONTAINER_ID,
+        address = ADDRESS,
+        volume = VOLUME,
+        latitude = LATITUDE,
+        longitude = LONGITUDE,
+        status=STATUS
     )    
     return resp_container
 
@@ -135,16 +158,22 @@ async def update_container(
             This function also must to check if the cumulative volume exceeds
             the truck capacity.
             ''')
+        #TODO Include optimal distance in route register
 
-
-
+    ## Prepare response data
+    CONTAINER_ID = int(str(container_updated.container_id))
+    ADDRESS = str(container_updated.address)
+    VOLUME = float(str(container_updated.volume))
+    LATITUDE = float(str(container_updated.latitude))
+    LONGITUDE = float(str(container_updated.longitude))
+    STATUS = StatusContainer(container_updated.status)
     resp_container = Container(
-            container_id=container_updated.container_id,
-            address = container_updated.address,
-            volume = container_updated.volume,
-            latitude = container_updated.latitude,
-            longitude = container_updated.longitude,
-            status=container_updated.status
+            container_id = CONTAINER_ID,
+            address = ADDRESS,
+            volume = VOLUME,
+            latitude = LATITUDE,
+            longitude = LONGITUDE,
+            status=STATUS
         )    
     return resp_container
 

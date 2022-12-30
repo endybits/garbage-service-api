@@ -36,3 +36,7 @@ class CRUDRoutes(CRUDBase):
         db.commit()
         db.refresh(db_obj)
         return db_obj
+
+
+    def remove(self, db: Session, *, id: int) -> RouteModel:
+        return super().remove(db, id=id)
