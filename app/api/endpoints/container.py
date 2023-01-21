@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from fastapi import APIRouter
 from fastapi import status, Depends, HTTPException
 from fastapi import Path, Body
+from fastapi.encoders import jsonable_encoder
 
 from app.utils.base import StatusContainer
 from app.schemas.container import Container, ContainerCreate, ContainerUpdate
@@ -35,21 +36,15 @@ async def create_container(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail= f'Object not was created'
         )
-    
-    CONTAINER_ID = int(str(container.container_id))
-    ADDRESS = str(container.address)
-    VOLUME = float(str(container.volume))
-    LATITUDE = float(str(container.latitude))
-    LONGITUDE = float(str(container.longitude))
-    STATUS = StatusContainer(container.status)
 
+    json_container = jsonable_encoder(container)
     resp_container = Container(
-        container_id=CONTAINER_ID,
-        address = ADDRESS,
-        volume = VOLUME,
-        latitude = LATITUDE,
-        longitude = LONGITUDE,
-        status=STATUS
+        container_id=json_container["container_id"],
+        address = json_container["address"],
+        volume = json_container["volume"],
+        latitude = json_container["latitude"],
+        longitude = json_container["longitude"],
+        status=json_container["status"]
     )    
     return resp_container
 
@@ -68,20 +63,15 @@ async def container_list(
     containers = CRUDContainer(ContainerModel).get_container_list(db=db, skip=skip, limit=limit)
     resp_container_list = []
     for container in containers:
-        CONTAINER_ID = int(str(container.container_id))    
-        ADDRESS = str(container.address)
-        VOLUME = float(str(container.volume))
-        LATITUDE = float(str(container.latitude))
-        LONGITUDE = float(str(container.longitude))
-        STATUS = StatusContainer(container.status)
-
+        json_container = jsonable_encoder(container)
+        print(json_container)
         container_item = Container(
-            container_id=CONTAINER_ID,
-            address = ADDRESS,
-            volume = VOLUME,
-            latitude = LATITUDE,
-            longitude = LONGITUDE,
-            status=STATUS
+            container_id=json_container["container_id"],
+            address = json_container["address"],
+            volume = json_container["volume"],
+            latitude = json_container["latitude"],
+            longitude = json_container["longitude"],
+            status=json_container["status"]
         )
         resp_container_list.append(container_item)
     return resp_container_list    
@@ -104,20 +94,14 @@ async def container_detail(
             detail= f'Container with id= {container_id} doesn\'t exists'
         )
 
-    CONTAINER_ID = int(str(container.container_id))
-    ADDRESS = str(container.address)
-    VOLUME = float(str(container.volume))
-    LATITUDE = float(str(container.latitude))
-    LONGITUDE = float(str(container.longitude))
-    STATUS = StatusContainer(container.status)
-
+    json_container = jsonable_encoder(container)
     resp_container = Container(
-        container_id=CONTAINER_ID,
-        address = ADDRESS,
-        volume = VOLUME,
-        latitude = LATITUDE,
-        longitude = LONGITUDE,
-        status=STATUS
+        container_id=json_container["container_id"],
+        address = json_container["address"],
+        volume = json_container["volume"],
+        latitude = json_container["latitude"],
+        longitude = json_container["longitude"],
+        status=json_container["status"]
     )    
     return resp_container
 
@@ -148,19 +132,11 @@ async def update_container(
         )
     container_status = None
     if isinstance(container, dict):
-        container_status = container.get('status') if container.get('status') else None
+        container_status = container.get('status') if container.get('status') else old_status
     if isinstance(container, ContainerUpdate):
         container_status = container.status.value
     
-    
-    ## Prepare response data
-    CONTAINER_ID = int(str(container_updated.container_id))
-    ADDRESS = str(container_updated.address)
-    VOLUME = float(str(container_updated.volume))
-    LATITUDE = float(str(container_updated.latitude))
-    LONGITUDE = float(str(container_updated.longitude))
-    STATUS = StatusContainer(container_updated.status)
-    
+    json_container = jsonable_encoder(container_updated)
     if container_status == 'full' and container_obj.status != 'full':   
         # status changed to full
         print('''
@@ -169,16 +145,16 @@ async def update_container(
             the truck capacity.
             ''')
         #TODO Include optimal distance in route register
-    add_point_to_route(container_id=CONTAINER_ID, volume=VOLUME, db=db)
+        add_point_to_route(container_id=json_container["container_id"], db=db)
 
     resp_container = Container(
-            container_id = CONTAINER_ID,
-            address = ADDRESS,
-            volume = VOLUME,
-            latitude = LATITUDE,
-            longitude = LONGITUDE,
-            status=STATUS
-        )    
+        container_id=json_container["container_id"],
+        address = json_container["address"],
+        volume = json_container["volume"],
+        latitude = json_container["latitude"],
+        longitude = json_container["longitude"],
+        status=json_container["status"]
+    )
     return resp_container
 
 

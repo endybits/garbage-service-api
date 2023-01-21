@@ -43,7 +43,7 @@ matrix2 =[
     [662, 1210, 754, 1358, 1244, 708, 480, 856, 514, 468, 354, 844, 730, 536, 194, 798, 0],
 ]
 
-locations = [
+locations1 = [
     (11.53348, -72.91773, 3),
     (11.53241, -72.92202, 1),
     (11.53917, -72.92646, 4),
@@ -61,6 +61,8 @@ locations = [
     (11.53224, -72.91281, 21),
     (11.52739, -72.89781, 13),
 ]
+
+locations = [(11.2222, 17.3333, 4), (11.4654, 17.6425, 1), (11.3434, 17.4545, 5), (11.1111, 17.7778, 3), (11.4654, 17.6425, 2), (11.9999, 17.3333, 6)]
 
 
 
@@ -90,15 +92,15 @@ def compute_euclidean_distance_matrix(locations):
 #print(dist)
 
 
-def create_data_model():
+def create_data_model(locations: list[tuple]):
     '''Stores the data from the problem'''
     data = {}
     data['num_vehicles'] = 1
-    data['starts'] = [1]
-    data['ends'] = [15]
+    data['starts'] = [0]
+    data['ends'] = [len(locations)-1]
     data['depot'] = 0
-    _, indexes = compute_euclidean_distance_matrix(locations)
-    data['distance_matrix'] = matrix1
+    distance_matrix, indexes = compute_euclidean_distance_matrix(locations)
+    data['distance_matrix'] = distance_matrix
     return data, indexes
 
 def show_solution(data, manager, routing, solution):
@@ -135,11 +137,11 @@ def show_solution(data, manager, routing, solution):
 
 
 
-def main():
+def sort_vehicle_routing_problem(locations: list[tuple]):
     ''' Solve de VRP problem '''
     
     # Instantiate the data problem
-    data, indexes = create_data_model()
+    data, indexes = create_data_model(locations = locations)
 
     # Create a routing index manager
     manager = pywrapcp.RoutingIndexManager(len(data['distance_matrix']), data['num_vehicles'], data['starts'], data['ends'])
@@ -164,7 +166,7 @@ def main():
     routing.AddDimension(
         evaluator_index=transit_callback_index,
         slack_max=0, #no slack
-        capacity=15000, #vehicle maximun travel dinstance
+        capacity=500000, #vehicle maximun travel dinstance
         fix_start_cumul_to_zero=True, #Start cumul to zero
         name=dimension_name
     )
@@ -187,8 +189,12 @@ def main():
         
         ### Outputs
         print(indexes)
-        print(data_route['nodes'])
-        print(sorted_route)
+        sorted_locations = []
+        for node in data_route['nodes']:
+            sorted_locations.append(locations[node])
+        #print(sorted_locations)
+        
+        return sorted_locations
 
 if __name__ == '__main__':
-    main()
+    print(sort_vehicle_routing_problem(locations))
