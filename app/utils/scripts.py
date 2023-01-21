@@ -45,11 +45,11 @@ def add_point_to_route(
         
         locations = route_schema.points
         print(locations)
-        container_id = 2
+        #container_id = 2
         is_duplicated = False
         for location in  locations:
             if location['container_id'] == container_id:
-                #TODO Could be necessary to raise an Exeption.
+                #TODO Could be necessary to raise an Exception.
                 is_duplicated = True
                 print(f"Duplicate asignation container_id = {container_id}")
         if not is_duplicated:
@@ -70,11 +70,11 @@ def add_point_to_route(
                 print(obj_in)
                 updated_route = CRUDRoutes(RouteModel).update(db=db, db_obj=route_obj, object_in=obj_in)
                 print(updated_route)
-                if updated_route >= 10000:
+                if updated_route.cumulative_vol >= 10000:
                     print('Launching Routing Service.')
                     
                     ### Tansform Status to closed
                     ### Calculate Optimal Route
-                    ### Create a new field called optimar_route
+                    ### Create a new field called optimal_route
                     ### Generate an Alert to generate the service trip. 
                     ### Create a new route. 

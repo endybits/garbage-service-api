@@ -5,12 +5,14 @@ from sqlalchemy.orm import Session
 from fastapi import APIRouter
 from fastapi import status, Depends
 from fastapi import Body, Path
+from fastapi.encoders import jsonable_encoder
 
 from app.api.deps import get_db
 from app.utils.base import StatusRoute
-from app.models.models import RouteModel
+from app.models.models import RouteModel, ContainerModel
 from app.schemas.route import Route, RouteCreate, RouteUpdate
 from app.crud.routes import CRUDRoutes
+from app.crud.container import CRUDContainer
 
 router = APIRouter()
 
@@ -72,6 +74,38 @@ async def update_route(
     route_obj = CRUDRoutes(RouteModel).get(db=db, id=route_id)
     updated_route = CRUDRoutes(RouteModel).update(db=db, db_obj=route_obj, object_in=route)
     return updated_route
+
+## Update Route
+@router.put(
+    path='/{route_id}/{container_id}',
+    status_code=status.HTTP_200_OK
+)
+async def eject_container_from_route(
+    db: Session = Depends(get_db),
+    route_id: int = Path(..., gt=0),
+    container_id: int = Path(..., gt=0),
+):
+    
+    route_obj = CRUDRoutes(RouteModel).get(db=db, id=route_id)
+    route = jsonable_encoder(route_obj)
+    container_points = route["points"]
+    print(route)
+    print('\n')
+    container_exists = False
+    for point in container_points:
+        if point['container_id'] == container_id:
+            container_exists = True
+            container_points.remove(point)
+    if container_exists:
+        container_obj = CRUDContainer(ContainerModel).get(db=db, id=container_id)
+        container_obj = jsonable_encoder(container_obj)
+        result_cum_vol = route['cumulative_vol'] - container_obj['volume']
+        route['cumulative_vol'] = result_cum_vol if result_cum_vol > 0 else 0
+        print(route)
+        updated_route = CRUDRoutes(RouteModel).update(db=db, db_obj=route_obj, object_in=route)
+        return {"action":f"The container {container_id} was ejected from the list point in route {route_id}", "object": updated_route} #TODO include 200 status code
+    return {"response":f"Container {container_id} does not exists in route {route_id}"} #TODO include 400 status code
+
 
 
 ## Remove Route

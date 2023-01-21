@@ -20,4 +20,5 @@ class RouteCreate(RouteBase):
 
 
 class RouteUpdate(RouteBase):
+    ### Verify if this class heritage of RouteBase (without route_id)
     pass
